@@ -1,3 +1,4 @@
+from traceback import format_exc
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -9,11 +10,16 @@ URL_TEMPLATE = "https://cdn.rage.mp/master/"
 initialize_db()  # Создание таблиц в базе данных
 
 while True:
-    projects_online = parse_players(URL_TEMPLATE)  # Парсим онлайн по проектам
+    sleep(60)
+    try:
+        projects_online = parse_players(URL_TEMPLATE)  # Парсим онлайн по проектам
 
-    for project in projects_online:
-        update_database(project, projects_online[project])  # Вызов функции обновления базы данных
-    # Удаление пиков онлайна возрастом 1+ день
-    PeakOnline.delete().where(PeakOnline.date < (datetime.now() - timedelta(days=1)))
-    widget_update()  # Вызов функции обновления виджета в группе ВК
+        for project in projects_online:
+            update_database(project, projects_online[project])  # Вызов функции обновления базы данных
+        # Удаление пиков онлайна возрастом 1+ день
+        PeakOnline.delete().where(PeakOnline.date < (datetime.now() - timedelta(days=1)))
+        widget_update()  # Вызов функции обновления виджета в группе ВК
+    except Exception:
+        print(format_exc())
+        print(datetime.now())
     sleep(60)

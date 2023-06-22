@@ -1,3 +1,4 @@
+from traceback import format_exc
 from datetime import datetime
 
 from peewee import Model, MySQLDatabase, AutoField, CharField, IntegerField, ForeignKeyField, DateTimeField
@@ -50,9 +51,13 @@ def initialize_db():
     Функция создающая в базе данных таблицы
     :return: None
     """
-    connection.connect()
-    connection.create_tables([Projects, PeakOnline], safe=True)
-    connection.close()
+    try:
+        connection.connect()
+        connection.create_tables([Projects, PeakOnline], safe=True)
+        connection.close()
+    except Exception:
+        print(format_exc())
+        print(datetime.now())
 
 
 def update_database(project, project_data):
@@ -62,39 +67,43 @@ def update_database(project, project_data):
     :param project_data: dict {'players':int, 'peak':int, 'groupId':string}
     :return:
     """
-    if not Projects.select().where(Projects.name == project).exists():  # Проекта в базе нет
-        proj = Projects()  # Добавляем новый проект
-        proj.name = project
-        proj.players = project_data['players']
-        proj.peak = project_data['peak']
-        proj.record = project_data['peak']
-        proj.percent = "0"
-        proj.logo = project_data['groupId']
-        proj.save()
-
-        online = PeakOnline()  # Добавляем пиковый онлайн
-        online.name = project
-        online.peak = proj.peak
-        online.save()
-    else:  # Проект в базе есть
-        proj = Projects.get(Projects.name == project)  # Получение проекта по имени и обновление онлайна
-        proj.players = project_data['players']
-        proj.peak = project_data['peak']
-        yesterday_peak = PeakOnline.select().where(PeakOnline.name == project).order_by(PeakOnline.date.asc()) \
-            .limit(1).get()  # Получение самого старого пика онлайна у проекта
-        if proj.record < project_data['peak']:  # Обновелнение рекорда онлайна
+    try:
+        if not Projects.select().where(Projects.name == project).exists():  # Проекта в базе нет
+            proj = Projects()  # Добавляем новый проект
+            proj.name = project
+            proj.players = project_data['players']
+            proj.peak = project_data['peak']
             proj.record = project_data['peak']
-        online = PeakOnline()  # Добавляем новый пиковый онлайн
-        online.name = project
-        online.peak = proj.peak
-        online.save()
-        if yesterday_peak.peak < project_data['peak']:  # Подсчет разницы между пиками онлайна
-            percent = ((project_data['peak'] - yesterday_peak.peak) / yesterday_peak.peak) * 100
-            percent = round(percent, 2)
-            proj.percent = f"+{percent}%"
-        else:
-            percent = ((yesterday_peak.peak - project_data['peak']) / project_data['peak']) * 100
-            percent = round(percent, 2)
-            proj.percent = f"-{percent}%"
+            proj.percent = "0"
+            proj.logo = project_data['groupId']
+            proj.save()
 
-        proj.save()
+            online = PeakOnline()  # Добавляем пиковый онлайн
+            online.name = project
+            online.peak = proj.peak
+            online.save()
+        else:  # Проект в базе есть
+            proj = Projects.get(Projects.name == project)  # Получение проекта по имени и обновление онлайна
+            proj.players = project_data['players']
+            proj.peak = project_data['peak']
+            yesterday_peak = PeakOnline.select().where(PeakOnline.name == project).order_by(PeakOnline.date.asc()) \
+                .limit(1).get()  # Получение самого старого пика онлайна у проекта
+            if proj.record < project_data['peak']:  # Обновелнение рекорда онлайна
+                proj.record = project_data['peak']
+            online = PeakOnline()  # Добавляем новый пиковый онлайн
+            online.name = project
+            online.peak = proj.peak
+            online.save()
+            if yesterday_peak.peak < project_data['peak']:  # Подсчет разницы между пиками онлайна
+                percent = ((project_data['peak'] - yesterday_peak.peak) / yesterday_peak.peak) * 100
+                percent = round(percent, 2)
+                proj.percent = f"+{percent}%"
+            else:
+                percent = ((yesterday_peak.peak - project_data['peak']) / project_data['peak']) * 100
+                percent = round(percent, 2)
+                proj.percent = f"-{percent}%"
+
+            proj.save()
+    except Exception:
+        print(format_exc())
+        print(datetime.now())
