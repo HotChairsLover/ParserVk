@@ -1,5 +1,5 @@
 from traceback import format_exc
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from peewee import Model, MySQLDatabase, AutoField, CharField, IntegerField, ForeignKeyField, DateTimeField
 
@@ -38,7 +38,7 @@ class PeakOnline(BaseModel):
     Модель пикового онлайна проектов
     """
     id = AutoField(column_name="id")
-    name = ForeignKeyField(Projects, to_field="name", column_name="name", null=False)
+    name = ForeignKeyField(Projects, to_field="name", column_name="name", null=False, on_delete='cascade')
     peak = IntegerField(column_name="peak", null=False)
     date = DateTimeField(column_name="date", default=datetime.now, null=False)
 
@@ -86,8 +86,14 @@ def update_database(project, project_data):
             proj = Projects.get(Projects.name == project)  # Получение проекта по имени и обновление онлайна
             proj.players = project_data['players']
             proj.peak = project_data['peak']
-            yesterday_peak = PeakOnline.select().where(PeakOnline.name == project).order_by(PeakOnline.date.asc()) \
-                .limit(1).get()  # Получение самого старого пика онлайна у проекта
+            yesterday_peak = PeakOnline.select().where(PeakOnline.name == project)\
+                .where(PeakOnline.date > (datetime.now() - timedelta(hours=23, minutes=59)))\
+                .where(PeakOnline.date < (datetime.now() - timedelta(hours=22)))\
+                .order_by(PeakOnline.date.asc()).limit(1)  # Получение вчерашнего пика онлайна
+            if yesterday_peak.count() == 0:
+                yesterday_peak = PeakOnline.select().where(PeakOnline.name == project).order_by(PeakOnline.date.asc()) \
+                    .limit(1)  # Получение самого старого пика онлайна у проекта
+            yesterday_peak = yesterday_peak.get()
             if proj.record < project_data['peak']:  # Обновелнение рекорда онлайна
                 proj.record = project_data['peak']
             online = PeakOnline()  # Добавляем новый пиковый онлайн
