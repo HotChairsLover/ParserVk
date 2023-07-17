@@ -98,16 +98,25 @@ def update_database(project, project_data):
                 proj.record = project_data['peak']
             online = PeakOnline()  # Добавляем новый пиковый онлайн
             online.name = project
-            online.peak = proj.peak
+            if proj.peak == 0:
+                online.peak = 1
+            else:
+                online.peak = proj.peak
             online.save()
             if yesterday_peak.peak < project_data['peak']:  # Подсчет разницы между пиками онлайна
-                percent = ((project_data['peak'] - yesterday_peak.peak) / yesterday_peak.peak) * 100
-                percent = round(percent, 2)
-                proj.percent = f"+{percent}%"
+                if project_data['peak'] == 0:
+                    proj.percent = f"0%"
+                else:
+                    percent = ((project_data['peak'] - yesterday_peak.peak) / yesterday_peak.peak) * 100
+                    percent = round(percent, 2)
+                    proj.percent = f"+{percent}%"
             else:
-                percent = ((yesterday_peak.peak - project_data['peak']) / project_data['peak']) * 100
-                percent = round(percent, 2)
-                proj.percent = f"-{percent}%"
+                if project_data['peak'] == 0:
+                    proj.percent = f"0%"
+                else:
+                    percent = ((yesterday_peak.peak - project_data['peak']) / project_data['peak']) * 100
+                    percent = round(percent, 2)
+                    proj.percent = f"-{percent}%"
 
             proj.save()
     except Exception:

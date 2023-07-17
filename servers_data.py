@@ -10,7 +10,7 @@ json_data = '''
       "DbId": "gta5rp",
       "groupID": 177216309,
       "servers": [
-        "downtown.gta5rp.com:22005",
+        "owntown.gta5rp.com:22005",
         "strawberry.gta5rp.com:22005",
         "vinewood.gta5rp.com:22005",
         "blackberry.gta5rp.com:22005",
@@ -24,7 +24,8 @@ json_data = '''
         "rockford.gta5rp.com:22005",
         "alta.gta5rp.com:22005",
         "davis.gta5rp.com:22005",
-        "harmony.gta5rp.com:22005"
+        "harmony.gta5rp.com:22005",
+        "redwood.gta5rp.com:22005"
       ]
     },
     {

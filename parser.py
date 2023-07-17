@@ -43,8 +43,9 @@ def parse_players(url):
                 "groupId": projects[project]['groupId']
             }
             for server in projects[project]['servers']:
-                data["players"] += all_servers[server]['players']
-                data["peak"] += all_servers[server]['peak']
+                if server in all_servers:
+                    data["players"] += all_servers[server]['players']
+                    data["peak"] += all_servers[server]['peak']
 
             complete[project] = data
         return complete

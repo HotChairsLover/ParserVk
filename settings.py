@@ -1,5 +1,5 @@
 group_token = "token"
-start_play = "link"
+start_play = "vk.com"
 host = "localhost"
 user = "root"
 password = "root"

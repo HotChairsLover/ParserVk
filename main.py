@@ -10,7 +10,7 @@ URL_TEMPLATE = "https://cdn.rage.mp/master/"
 initialize_db()  # Создание таблиц в базе данных
 
 while True:
-    sleep(60)
+    #sleep(60)
     try:
         projects_online = parse_players(URL_TEMPLATE)  # Парсим онлайн по проектам
 

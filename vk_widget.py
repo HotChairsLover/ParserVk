@@ -14,8 +14,9 @@ def widget_update():
     """
     try:
         projects = []
-        for project in Projects.select().order_by(
-                Projects.players.desc()):  # Создание списка словарей с данными проектов
+        db_projects = Projects.select().order_by(Projects.players.desc())
+        for project in db_projects:
+            # Создание списка словарей с данными проектов
             proj_data = {
                 'проект': project.name,
                 'онлайн': project.players,
